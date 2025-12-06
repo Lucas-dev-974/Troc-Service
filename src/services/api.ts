@@ -217,6 +217,42 @@ class ApiService {
   async getUserOffers(): Promise<Offer[]> {
     return this.request<Offer[]>('/users/offers');
   }
+
+  // Vérification d'email
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>('/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  async resendVerificationEmail(email: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>('/auth/resend-verification', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  // Réinitialisation de mot de passe
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async verifyPasswordResetToken(token: string): Promise<{ valid: boolean }> {
+    return this.request<{ valid: boolean }>(`/auth/verify-reset-token/${token}`, {
+      method: 'GET',
+    });
+  }
+
+  async resetPassword(token: string, password: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    });
+  }
 }
 
 export interface UserProfile {

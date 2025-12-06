@@ -4,12 +4,17 @@ import { OfferType } from '../entities/Offer';
 import { AuthRequest } from '../middleware/auth';
 import { ValidationErrors, isValidContact, validateLength } from '../utils/validation';
 import { createError } from '../middleware/errorHandler';
+import { MailService } from '../services/MailService';
+import { AppDataSource } from '../config/data-source';
+import { User } from '../entities/User';
 
 export class OfferController {
   private offerService: OfferService;
+  private mailService: MailService;
 
   constructor() {
     this.offerService = new OfferService();
+    this.mailService = new MailService();
   }
 
   getAll = async (req: Request, res: Response): Promise<void> => {
@@ -112,6 +117,19 @@ export class OfferController {
       }
 
       const offer = await this.offerService.create(createOfferDto);
+      
+      // Envoyer un email de confirmation à l'utilisateur
+      try {
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({ where: { id: req.userId! } });
+        if (user) {
+          await this.mailService.sendOfferConfirmationEmail(user.email, user.username, offer.title);
+        }
+      } catch (error) {
+        console.error('Erreur lors de l\'envoi de l\'email de confirmation:', error);
+        // Ne pas bloquer la création de l'offre si l'email échoue
+      }
+      
       res.status(201).json(offer);
     } catch (error) {
       if (error instanceof Error && 'statusCode' in error) {

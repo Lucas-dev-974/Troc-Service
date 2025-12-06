@@ -1,4 +1,5 @@
 import { Component, createSignal, Show } from 'solid-js';
+import { useNavigate } from '@solidjs/router';
 import { useAuth } from '../contexts/AuthContext';
 
 interface LoginFormProps {
@@ -8,6 +9,7 @@ interface LoginFormProps {
 
 const LoginForm: Component<LoginFormProps> = (props) => {
   const auth = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = createSignal('');
   const [password, setPassword] = createSignal('');
   const [error, setError] = createSignal<string | null>(null);
@@ -58,9 +60,18 @@ const LoginForm: Component<LoginFormProps> = (props) => {
         </div>
 
         <div>
-          <label for="login-password" class="block text-sm font-medium text-gray-700 mb-2">
-            Mot de passe
-          </label>
+          <div class="flex items-center justify-between mb-2">
+            <label for="login-password" class="block text-sm font-medium text-gray-700">
+              Mot de passe
+            </label>
+            <button
+              type="button"
+              onClick={() => navigate('/forgot-password')}
+              class="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Mot de passe oublié ?
+            </button>
+          </div>
           <input
             id="login-password"
             type="password"

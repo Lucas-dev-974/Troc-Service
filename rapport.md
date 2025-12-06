@@ -11,7 +11,7 @@
 
 Le projet **Troc & Services** est une application web full-stack moderne développée avec SolidJS (frontend) et Node.js/Express/TypeORM (backend). L'application permet aux utilisateurs de s'inscrire, se connecter, et proposer/consulter des offres de troc (services, objets, nourriture) entre particuliers. 
 
-**État actuel** : Application fonctionnelle et complète avec authentification, API REST, base de données SQLite, validation avancée, recherche, tri, pagination, modification/suppression/validation d'offres, gestion d'erreurs robuste, profil utilisateur avec statistiques et gestion des offres validées, accessibilité améliorée, géolocalisation complète, et Progressive Web App (PWA) pour installation sur bureau/appareil. Le projet est prêt pour un usage en développement et tests utilisateurs. Quelques améliorations sont recommandées pour la production (tests, notifications, migration base de données).
+**État actuel** : Application fonctionnelle et complète avec authentification, API REST, base de données SQLite, validation avancée, recherche, tri, pagination, modification/suppression/validation d'offres, gestion d'erreurs robuste, profil utilisateur avec statistiques et gestion des offres validées, accessibilité améliorée, géolocalisation complète, Progressive Web App (PWA) pour installation sur bureau/appareil, système de mailing complet avec vérification d'email et réinitialisation de mot de passe. Le projet est prêt pour un usage en développement et tests utilisateurs. Quelques améliorations sont recommandées pour la production (tests, notifications, migration base de données).
 
 ---
 
@@ -211,6 +211,13 @@ troc-dalon/
 - `POST /api/offers` - Créer une offre (protégé)
 - `PUT /api/offers/:id` - Modifier une offre (protégé, propriétaire uniquement)
 - `DELETE /api/offers/:id` - Supprimer une offre (protégé, propriétaire uniquement)
+- `PATCH /api/offers/:id/validate` - Valider une offre (protégé, propriétaire uniquement) ✅
+- `POST /api/auth/verify-email` - Vérifier l'email avec token ✅
+- `GET /api/auth/verify-email/:token` - Vérifier l'email via lien ✅
+- `POST /api/auth/resend-verification` - Renvoyer l'email de vérification ✅
+- `POST /api/auth/forgot-password` - Demander la réinitialisation de mot de passe ✅
+- `GET /api/auth/verify-reset-token/:token` - Vérifier la validité du token de réinitialisation ✅
+- `POST /api/auth/reset-password` - Réinitialiser le mot de passe ✅
 
 #### 6. **Utilitaires**
 - **validation.ts** : Utilitaires de validation
@@ -232,8 +239,9 @@ troc-dalon/
 - **Protection** : Routes API protégées avec middleware JWT
 - **Pages dédiées** : Pages séparées pour login et signup avec routage
 - **OAuth Google** : 🔄 Planifié - Connexion avec Google (OAuth 2.0)
-- **Vérification d'email** : 🔄 Planifié - Vérification de l'adresse email lors de l'inscription
-- **Réinitialisation de mot de passe** : 🔄 Planifié - Réinitialisation via email avec token sécurisé
+- **Vérification d'email** : ✅ Implémenté - Vérification de l'adresse email lors de l'inscription avec tokens sécurisés
+- **Réinitialisation de mot de passe** : ✅ Implémenté - Réinitialisation via email avec token sécurisé
+- **Système de mailing** : ✅ Implémenté - Service complet d'envoi d'emails avec templates HTML
 
 ### 2. Gestion des Offres ✅
 - **Création** : Formulaire complet avec validation avancée (protégé)
@@ -262,7 +270,7 @@ troc-dalon/
 - **Recherche** : Barre de recherche avec debounce (500ms)
 - **Tri** : Options de tri par date, titre ou auteur
 - **Pagination** : Navigation entre pages avec indicateur de total
-- **Actions utilisateur** : Boutons modifier/supprimer sur les offres du propriétaire
+- **Actions utilisateur** : Boutons modifier/supprimer/valider sur les offres du propriétaire ✅
 - **Validation en temps réel** : Feedback immédiat lors de la saisie
 - **Géolocalisation automatique** : Bouton "Me localiser automatiquement" dans les formulaires ✅
 - **Filtres géographiques** : Filtres par pays, région, ville, code postal sur la page d'accueil ✅
@@ -429,85 +437,97 @@ troc-dalon/
   - Augmentation du taux d'inscription
   - Sécurité renforcée (authentification via Google)
 
-#### 8. **Vérification d'Email** 🔄 **PLANIFIÉ**
-**Fonctionnalités à implémenter** :
-- Envoi d'email de vérification lors de l'inscription
-- Génération de token de vérification unique (expiration 24h)
-- Lien de vérification dans l'email
-- Page de vérification avec validation du token
-- Statut de vérification dans le profil utilisateur
-- Possibilité de renvoyer l'email de vérification
-- Blocage des fonctionnalités sensibles si email non vérifié (optionnel)
-- **Technologies recommandées** :
-  - Backend : `nodemailer` ou `sendgrid` pour l'envoi d'emails
-  - Génération de token : `crypto` (Node.js) ou `uuid`
-  - Stockage : Token stocké dans la base de données avec expiration
-  - Templates email : HTML avec lien de vérification
+#### 8. **Vérification d'Email** ✅ **IMPLÉMENTÉ**
+**État actuel** : Système complet de vérification d'email avec tokens sécurisés
+**Fonctionnalités implémentées** :
+- ✅ Envoi d'email de vérification lors de l'inscription
+- ✅ Génération de token de vérification unique (expiration 24h) avec `crypto`
+- ✅ Lien de vérification dans l'email avec template HTML personnalisé
+- ✅ Page de vérification avec validation du token (`/verify-email`)
+- ✅ Page de renvoi d'email de vérification (`/resend-verification`)
+- ✅ Routes API : `POST /api/auth/verify-email` et `GET /api/auth/verify-email/:token`
+- ✅ Route API : `POST /api/auth/resend-verification`
+- ✅ Validation côté serveur stricte avec gestion d'erreurs
+- ✅ Base de données : Champs `emailVerified`, `emailVerificationToken`, `emailVerificationExpiry` ajoutés dans `User`
+- ✅ Intégration avec le système de mailing
+- **Technologies utilisées** :
+  - Backend : `nodemailer` pour l'envoi d'emails
+  - Génération de token : `crypto.randomBytes()` (Node.js)
+  - Templates email : HTML inline avec styles CSS
+  - Frontend : Pages SolidJS avec gestion d'états et navigation
 - **Sécurité** :
-  - Token unique et aléatoire
+  - Token unique et aléatoire (32 bytes)
   - Expiration (24 heures)
   - Utilisation unique du token
   - Validation côté serveur stricte
-  - Rate limiting sur les demandes de renvoi
-- **Base de données** :
-  - Ajout champ `emailVerified` (boolean, default: false) dans `User`
-  - Ajout champ `emailVerificationToken` (string, nullable, unique) dans `User`
-  - Ajout champ `emailVerificationExpiry` (datetime, nullable) dans `User`
-- **Bénéfices** :
+- **Bénéfices obtenus** :
   - Vérification de la validité des adresses email
   - Réduction des comptes avec emails invalides
   - Sécurité renforcée (confirmation de propriété de l'email)
   - Amélioration de la qualité des données utilisateur
 
-#### 9. **Réinitialisation de Mot de Passe** 🔄 **PLANIFIÉ**
-**Fonctionnalités à implémenter** :
-- Demande de réinitialisation via email
-- Génération de token sécurisé et unique (expiration 1h)
-- Envoi d'email avec lien de réinitialisation
-- Page de réinitialisation avec formulaire nouveau mot de passe
-- Validation du token et mise à jour du mot de passe
-- Invalidation du token après utilisation
-- **Technologies recommandées** :
-  - Backend : `nodemailer` ou `sendgrid` pour l'envoi d'emails
-  - Génération de token : `crypto` (Node.js) ou `uuid`
-  - Stockage : Token stocké dans la base de données avec expiration
-  - Templates email : HTML avec lien de réinitialisation
+#### 9. **Réinitialisation de Mot de Passe** ✅ **IMPLÉMENTÉ**
+**État actuel** : Système complet de réinitialisation de mot de passe avec tokens sécurisés
+**Fonctionnalités implémentées** :
+- ✅ Demande de réinitialisation via email (`/forgot-password`)
+- ✅ Génération de token sécurisé et unique (expiration 1h) avec `crypto`
+- ✅ Envoi d'email avec lien de réinitialisation avec template HTML personnalisé
+- ✅ Page de réinitialisation avec formulaire nouveau mot de passe (`/reset-password`)
+- ✅ Validation du token avant affichage du formulaire
+- ✅ Validation du token et mise à jour du mot de passe
+- ✅ Invalidation du token après utilisation
+- ✅ Routes API : `POST /api/auth/forgot-password`, `GET /api/auth/verify-reset-token/:token`, `POST /api/auth/reset-password`
+- ✅ Base de données : Champs `passwordResetToken`, `passwordResetExpiry` ajoutés dans `User`
+- ✅ Lien "Mot de passe oublié ?" dans le formulaire de connexion
+- ✅ Intégration avec le système de mailing
+- **Technologies utilisées** :
+  - Backend : `nodemailer` pour l'envoi d'emails
+  - Génération de token : `crypto.randomBytes()` (Node.js)
+  - Templates email : HTML inline avec styles CSS
+  - Frontend : Pages SolidJS avec gestion d'états et validation
 - **Sécurité** :
-  - Token unique et aléatoire
+  - Token unique et aléatoire (32 bytes)
   - Expiration courte (1 heure)
   - Utilisation unique du token
   - Validation côté serveur stricte
-- **Bénéfices** :
+  - Ne révèle pas si l'email existe ou non (sécurité)
+- **Bénéfices obtenus** :
   - Récupération de compte en cas d'oubli de mot de passe
   - Sécurité renforcée avec tokens temporaires
   - Expérience utilisateur améliorée
 
-#### 10. **Système de Mailing** 🔄 **PLANIFIÉ**
-**Fonctionnalités à implémenter** :
-- Service d'envoi d'emails (SMTP ou service tiers)
-- Templates d'emails HTML personnalisables
-- Emails transactionnels :
-  - Email de bienvenue après inscription
-  - Email de vérification d'email (lors de l'inscription)
-  - Email de confirmation de création d'offre
-  - Email de réinitialisation de mot de passe
-  - Email de notification de nouveaux messages (futur)
-- Emails de notification :
-  - Notifications de nouvelles offres correspondant aux critères (futur)
-  - Rappels et alertes (futur)
-- **Technologies recommandées** :
-  - Backend : `nodemailer` (SMTP) ou services tiers (SendGrid, Mailgun, AWS SES)
-  - Templates : `handlebars`, `ejs` ou `mjml` pour emails HTML
+#### 10. **Système de Mailing** ✅ **IMPLÉMENTÉ**
+**État actuel** : Service de mailing complet avec templates HTML et support SMTP configurable
+**Fonctionnalités implémentées** :
+- ✅ Service d'envoi d'emails (`MailService`) avec support SMTP via `nodemailer`
+- ✅ Templates d'emails HTML personnalisables avec styles CSS inline
+- ✅ Emails transactionnels implémentés :
+  - ✅ Email de bienvenue après inscription
+  - ✅ Email de vérification d'email (lors de l'inscription)
+  - ✅ Email de confirmation de création d'offre
+  - ✅ Email de réinitialisation de mot de passe
+- ✅ Configuration via variables d'environnement (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM)
+- ✅ Support de multiples services SMTP (Gmail, SendGrid, Mailgun, Mailtrap, etc.)
+- ✅ Gestion gracieuse si SMTP non configuré (avertissements dans les logs, application fonctionnelle)
+- ✅ Variables d'environnement documentées dans `.env.example`
+- ✅ Frontend URL configurable pour les liens dans les emails
+- **Technologies utilisées** :
+  - Backend : `nodemailer` (SMTP) avec support de tous les services SMTP standards
+  - Templates : HTML inline avec styles CSS (pas de dépendances externes)
   - Configuration : Variables d'environnement pour credentials SMTP
 - **Configuration** :
-  - Variables d'environnement pour serveur SMTP
-  - Templates d'emails réutilisables
-  - Queue d'envoi pour emails asynchrones (optionnel)
-- **Bénéfices** :
+  - Variables d'environnement pour serveur SMTP (documentées dans `.env.example`)
+  - Templates d'emails réutilisables dans `MailService`
+  - Support TLS/SSL automatique selon le port
+- **Fichiers créés/modifiés** :
+  - ✅ `serveur/src/services/MailService.ts` : Service de mailing complet
+  - ✅ `serveur/env.example` : Documentation des variables d'environnement
+- **Bénéfices obtenus** :
   - Communication avec les utilisateurs
   - Notifications importantes
   - Professionnalisme de l'application
   - Amélioration de l'engagement utilisateur
+  - Système flexible et configurable
 
 #### 11. **Progressive Web App (PWA)** ✅ **IMPLÉMENTÉ**
 **Fonctionnalités implémentées** :
@@ -638,23 +658,26 @@ troc-dalon/
    - Création automatique de compte
    - Récupération des informations de profil Google
 
-4. **Vérification d'email** 🔄 **PLANIFIÉ**
+4. ✅ **Vérification d'email** - Implémenté
    - Envoi d'email de vérification lors de l'inscription
-   - Génération de token de vérification
+   - Génération de token de vérification (24h)
    - Page de vérification avec validation
-   - Statut de vérification dans le profil
+   - Page de renvoi d'email de vérification
+   - Routes API complètes
 
-5. **Réinitialisation de mot de passe** 🔄 **PLANIFIÉ**
+5. ✅ **Réinitialisation de mot de passe** - Implémenté
    - Demande de réinitialisation via email
-   - Génération de token sécurisé
+   - Génération de token sécurisé (1h)
    - Envoi d'email avec lien de réinitialisation
    - Page de réinitialisation avec validation
+   - Lien "Mot de passe oublié ?" dans le formulaire de connexion
 
-6. **Système de Mailing** 🔄 **PLANIFIÉ**
-   - Service d'envoi d'emails (SMTP/service tiers)
-   - Templates d'emails HTML
-   - Emails transactionnels (bienvenue, confirmation, réinitialisation)
-   - Configuration SMTP
+6. ✅ **Système de Mailing** - Implémenté
+   - Service d'envoi d'emails (SMTP/service tiers) via nodemailer
+   - Templates d'emails HTML personnalisables
+   - Emails transactionnels (bienvenue, vérification, confirmation d'offre, réinitialisation)
+   - Configuration SMTP via variables d'environnement
+   - Support de multiples services SMTP (Gmail, SendGrid, Mailgun, Mailtrap, etc.)
 
 7. ✅ **Progressive Web App (PWA)** - Implémenté
    - Manifeste web généré automatiquement
@@ -754,12 +777,17 @@ Le projet **Troc & Services** démontre une excellente maîtrise des technologie
 - ✅ Progressive Web App (PWA) avec installation sur bureau/appareil
 - ✅ Service Worker minimal pour permettre l'installation
 - ✅ Icônes adaptatives générées automatiquement
+- ✅ Validation d'offres avec exclusion des recherches
+- ✅ Gestion des offres validées dans le profil utilisateur (dropdown)
+- ✅ Système de mailing complet avec templates HTML
+- ✅ Vérification d'email avec tokens sécurisés
+- ✅ Réinitialisation de mot de passe avec tokens sécurisés
 
 **Prochaines étapes** :
 - Implémenter l'authentification OAuth avec Google
-- Implémenter la vérification d'email
-- Implémenter la réinitialisation de mot de passe
-- Mettre en place le système de mailing
+- ✅ Implémenter la vérification d'email - **TERMINÉ**
+- ✅ Implémenter la réinitialisation de mot de passe - **TERMINÉ**
+- ✅ Mettre en place le système de mailing - **TERMINÉ**
 - ✅ Transformer le frontend en Progressive Web App (PWA) - **TERMINÉ**
 - Implémenter des tests (unitaires, intégration, E2E)
 - Ajouter système de notifications
@@ -791,7 +819,7 @@ Avec les améliorations recommandées, ce projet peut facilement devenir une **a
 ---
 
 **Rapport généré le** : Décembre 2024  
-**Dernière mise à jour** : Décembre 2024 (après implémentation de la géolocalisation et pré-remplissage automatique)  
+**Dernière mise à jour** : Décembre 2024 (après implémentation de la géolocalisation, pré-remplissage automatique, PWA, et validation d'offres)  
 **Analysé par** : Assistant IA  
 **Version du projet** : 1.0.0  
 **Statut** : ✅ Fonctionnel - Prêt pour développement et tests utilisateurs
@@ -812,8 +840,9 @@ Avec les améliorations recommandées, ce projet peut facilement devenir une **a
 #### Gestion des Offres ✅
 - Modification d'offres (propriétaire uniquement)
 - Suppression d'offres (propriétaire uniquement)
+- Validation d'offres (propriétaire uniquement) - Les offres validées ne s'affichent plus dans les recherches ✅
 - Vérification automatique de propriété
-- Interface utilisateur complète
+- Interface utilisateur complète avec boutons modifier/supprimer/valider
 
 #### Recherche et Filtres ✅
 - Recherche par mots-clés (titre, description, auteur)

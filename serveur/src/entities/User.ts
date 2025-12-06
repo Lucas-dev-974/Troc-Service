@@ -34,6 +34,21 @@ export class User {
   @Column({ type: 'varchar', length: 20, nullable: true })
   postalCode?: string;
 
+  @Column({ type: 'boolean', default: false })
+  emailVerified!: boolean;
+
+  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
+  emailVerificationToken?: string;
+
+  @Column({ type: 'datetime', nullable: true })
+  emailVerificationExpiry?: Date;
+
+  @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
+  passwordResetToken?: string;
+
+  @Column({ type: 'datetime', nullable: true })
+  passwordResetExpiry?: Date;
+
   @OneToMany(() => Offer, (offer) => offer.user)
   offers!: Offer[];
 
