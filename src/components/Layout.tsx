@@ -1,6 +1,7 @@
 import { Component, ParentComponent, Show } from 'solid-js';
 import { A, useNavigate } from '@solidjs/router';
 import { useAuth } from '../contexts/AuthContext';
+import InstallPWA from './InstallPWA';
 
 interface LayoutProps {
   children: any;
@@ -25,24 +26,24 @@ const Layout: ParentComponent<LayoutProps> = (props) => {
                 <p class="text-gray-600 mt-2">Proposez et découvrez des services, objets et nourriture entre particuliers</p>
               </A>
               <div class="flex items-center gap-4">
-              <Show when={auth.isAuthenticated()}>
-                <div class="flex items-center gap-3">
-                  <A
-                    href="/profile"
-                    class="text-sm text-gray-700 hover:text-gray-900 transition"
-                    aria-label="Voir mon profil"
-                  >
-                    Bonjour, <span class="font-medium">{auth.user()?.username}</span>
-                  </A>
-                  <button
-                    onClick={() => auth.logout()}
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
-                    aria-label="Se déconnecter"
-                  >
-                    Déconnexion
-                  </button>
-                </div>
-              </Show>
+                <Show when={auth.isAuthenticated()}>
+                  <div class="flex items-center gap-3">
+                    <A
+                      href="/profile"
+                      class="text-sm text-gray-700 hover:text-gray-900 transition"
+                      aria-label="Voir mon profil"
+                    >
+                      Bonjour, <span class="font-medium">{auth.user()?.username}</span>
+                    </A>
+                    <button
+                      onClick={() => auth.logout()}
+                      class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+                      aria-label="Se déconnecter"
+                    >
+                      Déconnexion
+                    </button>
+                  </div>
+                </Show>
                 <Show when={!auth.isAuthenticated()}>
                   <div class="flex items-center gap-2">
                     <button
@@ -78,6 +79,8 @@ const Layout: ParentComponent<LayoutProps> = (props) => {
           </div>
         </footer>
       </Show>
+
+      <InstallPWA />
     </div>
   );
 };

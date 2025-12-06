@@ -231,6 +231,9 @@ troc-dalon/
 - **Persistance** : Token et utilisateur stockés dans localStorage
 - **Protection** : Routes API protégées avec middleware JWT
 - **Pages dédiées** : Pages séparées pour login et signup avec routage
+- **OAuth Google** : 🔄 Planifié - Connexion avec Google (OAuth 2.0)
+- **Vérification d'email** : 🔄 Planifié - Vérification de l'adresse email lors de l'inscription
+- **Réinitialisation de mot de passe** : 🔄 Planifié - Réinitialisation via email avec token sécurisé
 
 ### 2. Gestion des Offres ✅
 - **Création** : Formulaire complet avec validation avancée (protégé)
@@ -398,13 +401,128 @@ troc-dalon/
 - ✅ Pré-remplissage automatique des champs de localisation dans les formulaires
 - ✅ **Impact** : Amélioration significative de l'expérience utilisateur en favorisant les échanges locaux
 
-#### 7. **Notifications**
+#### 7. **Authentification OAuth (Google)** 🔄 **PLANIFIÉ**
+**Fonctionnalités à implémenter** :
+- Connexion avec Google (OAuth 2.0)
+- Intégration Google Sign-In dans le frontend
+- Backend OAuth avec vérification des tokens Google
+- Création automatique de compte si l'utilisateur n'existe pas
+- Association du compte Google avec un compte existant (optionnel)
+- Gestion des sessions OAuth
+- Récupération des informations de profil Google (nom, email, photo)
+- **Technologies recommandées** :
+  - Frontend : Google Identity Services (nouvelle API) ou `@react-oauth/google` adapté pour SolidJS
+  - Backend : `google-auth-library` (Node.js) pour vérifier les tokens
+  - Stockage : Lier l'ID Google à l'utilisateur dans la base de données
+- **Bénéfices** :
+  - Simplification de l'inscription/connexion pour les utilisateurs
+  - Réduction de la friction d'authentification
+  - Augmentation du taux d'inscription
+  - Sécurité renforcée (authentification via Google)
+
+#### 8. **Vérification d'Email** 🔄 **PLANIFIÉ**
+**Fonctionnalités à implémenter** :
+- Envoi d'email de vérification lors de l'inscription
+- Génération de token de vérification unique (expiration 24h)
+- Lien de vérification dans l'email
+- Page de vérification avec validation du token
+- Statut de vérification dans le profil utilisateur
+- Possibilité de renvoyer l'email de vérification
+- Blocage des fonctionnalités sensibles si email non vérifié (optionnel)
+- **Technologies recommandées** :
+  - Backend : `nodemailer` ou `sendgrid` pour l'envoi d'emails
+  - Génération de token : `crypto` (Node.js) ou `uuid`
+  - Stockage : Token stocké dans la base de données avec expiration
+  - Templates email : HTML avec lien de vérification
+- **Sécurité** :
+  - Token unique et aléatoire
+  - Expiration (24 heures)
+  - Utilisation unique du token
+  - Validation côté serveur stricte
+  - Rate limiting sur les demandes de renvoi
+- **Base de données** :
+  - Ajout champ `emailVerified` (boolean, default: false) dans `User`
+  - Ajout champ `emailVerificationToken` (string, nullable, unique) dans `User`
+  - Ajout champ `emailVerificationExpiry` (datetime, nullable) dans `User`
+- **Bénéfices** :
+  - Vérification de la validité des adresses email
+  - Réduction des comptes avec emails invalides
+  - Sécurité renforcée (confirmation de propriété de l'email)
+  - Amélioration de la qualité des données utilisateur
+
+#### 9. **Réinitialisation de Mot de Passe** 🔄 **PLANIFIÉ**
+**Fonctionnalités à implémenter** :
+- Demande de réinitialisation via email
+- Génération de token sécurisé et unique (expiration 1h)
+- Envoi d'email avec lien de réinitialisation
+- Page de réinitialisation avec formulaire nouveau mot de passe
+- Validation du token et mise à jour du mot de passe
+- Invalidation du token après utilisation
+- **Technologies recommandées** :
+  - Backend : `nodemailer` ou `sendgrid` pour l'envoi d'emails
+  - Génération de token : `crypto` (Node.js) ou `uuid`
+  - Stockage : Token stocké dans la base de données avec expiration
+  - Templates email : HTML avec lien de réinitialisation
+- **Sécurité** :
+  - Token unique et aléatoire
+  - Expiration courte (1 heure)
+  - Utilisation unique du token
+  - Validation côté serveur stricte
+- **Bénéfices** :
+  - Récupération de compte en cas d'oubli de mot de passe
+  - Sécurité renforcée avec tokens temporaires
+  - Expérience utilisateur améliorée
+
+#### 10. **Système de Mailing** 🔄 **PLANIFIÉ**
+**Fonctionnalités à implémenter** :
+- Service d'envoi d'emails (SMTP ou service tiers)
+- Templates d'emails HTML personnalisables
+- Emails transactionnels :
+  - Email de bienvenue après inscription
+  - Email de vérification d'email (lors de l'inscription)
+  - Email de confirmation de création d'offre
+  - Email de réinitialisation de mot de passe
+  - Email de notification de nouveaux messages (futur)
+- Emails de notification :
+  - Notifications de nouvelles offres correspondant aux critères (futur)
+  - Rappels et alertes (futur)
+- **Technologies recommandées** :
+  - Backend : `nodemailer` (SMTP) ou services tiers (SendGrid, Mailgun, AWS SES)
+  - Templates : `handlebars`, `ejs` ou `mjml` pour emails HTML
+  - Configuration : Variables d'environnement pour credentials SMTP
+- **Configuration** :
+  - Variables d'environnement pour serveur SMTP
+  - Templates d'emails réutilisables
+  - Queue d'envoi pour emails asynchrones (optionnel)
+- **Bénéfices** :
+  - Communication avec les utilisateurs
+  - Notifications importantes
+  - Professionnalisme de l'application
+  - Amélioration de l'engagement utilisateur
+
+#### 11. **Progressive Web App (PWA)** 🔄 **PLANIFIÉ**
+**Fonctionnalités à implémenter** :
+- Manifeste web (`manifest.json`) pour installation sur appareils
+- Installation sur mobile/desktop (bouton "Installer l'application")
+- Icônes adaptatives pour différents appareils (192x192, 512x512, et tailles intermédiaires)
+- Splash screen personnalisé au démarrage
+- Service Worker minimal (uniquement pour l'installation, pas de cache hors ligne)
+- **Technologies recommandées** :
+  - `vite-plugin-pwa` : Plugin Vite pour génération automatique du manifeste
+  - Service Worker minimal pour permettre l'installation
+- **Bénéfices** :
+  - Expérience utilisateur améliorée (installation sur bureau/appareil)
+  - Expérience native-like sur mobile et desktop
+  - Accès rapide depuis l'écran d'accueil
+  - Meilleure visibilité (apparaît comme application native)
+
+#### 12. **Notifications**
 **Fonctionnalités manquantes** :
 - Notifications pour nouvelles offres
 - Notifications pour messages
 - Préférences de notification
 
-#### 8. **Accessibilité** ✅ **IMPLÉMENTÉ**
+#### 13. **Accessibilité** ✅ **IMPLÉMENTÉ**
 **État actuel** : Accessibilité améliorée avec ARIA labels
 **Fonctionnalités** :
 - ✅ ARIA labels sur tous les boutons et liens
@@ -417,7 +535,7 @@ troc-dalon/
 - ✅ Navigation au clavier supportée (focus visible sur tous les éléments interactifs)
 - ✅ Structure sémantique HTML (`<article>`, `<form>`, etc.)
 
-#### 9. **Tests**
+#### 14. **Tests**
 **État actuel** : Aucun test
 **Recommandations** :
 - Tests unitaires (services, composants)
@@ -488,45 +606,48 @@ troc-dalon/
    - Navigation au clavier
    - Support lecteurs d'écran
 
-3. **Tests**
+3. **Authentification OAuth (Google)** 🔄 **PLANIFIÉ**
+   - Intégration Google Sign-In
+   - Backend OAuth avec vérification des tokens
+   - Création automatique de compte
+   - Récupération des informations de profil Google
+
+4. **Vérification d'email** 🔄 **PLANIFIÉ**
+   - Envoi d'email de vérification lors de l'inscription
+   - Génération de token de vérification
+   - Page de vérification avec validation
+   - Statut de vérification dans le profil
+
+5. **Réinitialisation de mot de passe** 🔄 **PLANIFIÉ**
+   - Demande de réinitialisation via email
+   - Génération de token sécurisé
+   - Envoi d'email avec lien de réinitialisation
+   - Page de réinitialisation avec validation
+
+6. **Système de Mailing** 🔄 **PLANIFIÉ**
+   - Service d'envoi d'emails (SMTP/service tiers)
+   - Templates d'emails HTML
+   - Emails transactionnels (bienvenue, confirmation, réinitialisation)
+   - Configuration SMTP
+
+7. **Progressive Web App (PWA)** 🔄 **PLANIFIÉ**
+   - Manifeste web pour installation
+   - Installation sur bureau/appareil
+   - Icônes adaptatives et splash screen
+   - Service Worker minimal (installation uniquement)
+   - Expérience native-like
+
+8. **Tests**
    - Tests unitaires backend
    - Tests d'intégration API
    - Tests composants frontend
 
 ### Phase 3 - Long Terme (2-3 mois)
-1. **Géolocalisation** ✅ **IMPLÉMENTÉ**
-   - **Base de données** :
-     - Ajout champs `country`, `region`, `city`, `postalCode` dans l'entité `User`
-     - Ajout champs `country`, `region`, `city`, `postalCode` dans l'entité `Offer`
-     - Index sur `region`, `city`, `postalCode` pour optimiser les requêtes de proximité
-   - **Backend** :
-     - Service de géolocalisation (validation et normalisation des adresses)
-     - Filtrage et tri des offres par région, ville, code postal ou pays
-     - Endpoint API avec paramètres `region`, `city`, `postalCode`, `country`
-     - Tri des résultats par priorité géographique (même pays > même code postal > même ville > même région)
-     - Filtrage par région, ville, code postal ou pays
-   - **Frontend** :
-     - Formulaire de saisie d'adresse avec champs : pays, région, ville, code postal
-     - **Géolocalisation automatique** : Demande de permission pour accéder à la position GPS de l'utilisateur (API `navigator.geolocation`)
-     - Conversion automatique des coordonnées GPS en adresse (géocodage inverse via API Gouv)
-     - Pré-remplissage automatique des champs pays, région, ville, code postal depuis la position GPS
-     - Fallback : Saisie manuelle si l'utilisateur refuse la géolocalisation ou si elle échoue
-     - Autocomplétion pour la ville et le code postal (API Gouv ou base locale)
-     - Affichage de la localisation (région, ville, code postal) sur chaque carte d'offre
-     - Filtres par région, ville, code postal ou pays
-     - Badge "Proche de vous" pour les offres du même pays/code postal/ville/région
-     - Indicateur de priorité géographique dans la liste (même pays/code postal/ville en premier)
-   - **Technologies recommandées** :
-     - API de géolocalisation : `navigator.geolocation` (navigateur) pour obtenir la position GPS
-     - API de géocodage inverse : API Gouv (France) pour convertir coordonnées GPS → adresse
-     - API de géocodage : API Gouv (France) pour autocomplétion villes/codes postaux
-     - Base de données des communes françaises pour validation
-     - Liste des régions françaises pour sélection
-     - Indexation des champs région, ville, code postal pour recherche rapide
-   - **Bénéfices** :
-     - Favorise les échanges locaux et réduit les déplacements
-     - Améliore la pertinence des résultats pour l'utilisateur
-     - Augmente les chances de transactions réussies
+1. **Progressive Web App (PWA)** 🔄 **PLANIFIÉ**
+   - Manifeste web pour installation
+   - Installation sur bureau/appareil
+   - Icônes adaptatives et splash screen
+   - Service Worker minimal (installation uniquement)
 
 2. **Fonctionnalités avancées**
    - Système de favoris
@@ -605,6 +726,11 @@ Le projet **Troc & Services** démontre une excellente maîtrise des technologie
 - ✅ Pré-remplissage automatique des champs du formulaire d'offre avec les données du profil
 
 **Prochaines étapes** :
+- Implémenter l'authentification OAuth avec Google
+- Implémenter la vérification d'email
+- Implémenter la réinitialisation de mot de passe
+- Mettre en place le système de mailing
+- Transformer le frontend en Progressive Web App (PWA)
 - Implémenter des tests (unitaires, intégration, E2E)
 - Ajouter système de notifications
 - Préparer pour la production (migration base de données, CI/CD)
@@ -786,3 +912,394 @@ Avec les améliorations recommandées, ce projet peut facilement devenir une **a
   - Moins d'erreurs de saisie grâce à l'utilisation des données du profil
   - Expérience utilisateur plus fluide et intuitive
   - Encouragement à créer plus d'offres grâce à la facilité d'utilisation
+
+### Décembre 2024 - Fonctionnalités d'Authentification Planifiées
+
+#### Authentification OAuth avec Google 🔄 **PLANIFIÉ**
+**Objectif** : Permettre aux utilisateurs de se connecter rapidement avec leur compte Google, simplifiant le processus d'inscription et de connexion
+
+**Spécifications techniques** :
+
+- **Frontend** :
+  - Intégration Google Identity Services (nouvelle API Google) ou bibliothèque compatible SolidJS
+  - Bouton "Se connecter avec Google" sur les pages de connexion et d'inscription
+  - Gestion du flux OAuth 2.0 côté client
+  - Récupération des informations de profil (nom, email, photo de profil)
+  - Stockage du token OAuth dans le localStorage (optionnel)
+  - Gestion des erreurs d'authentification Google
+
+- **Backend** :
+  - Route API `/api/auth/google` pour recevoir le token Google
+  - Vérification du token Google avec `google-auth-library` (Node.js)
+  - Récupération des informations utilisateur depuis Google (email, nom, photo)
+  - Création automatique de compte si l'utilisateur n'existe pas
+  - Association du compte Google avec un compte existant (si email correspond)
+  - Génération d'un token JWT pour l'application après authentification Google
+  - Gestion des cas d'erreur (token invalide, compte Google suspendu, etc.)
+
+- **Base de données** :
+  - Ajout champ `googleId` dans l'entité `User` (nullable, unique)
+  - Ajout champ `avatarUrl` pour stocker la photo de profil Google (optionnel)
+  - Migration pour ajouter les nouveaux champs
+
+- **Sécurité** :
+  - Vérification stricte des tokens Google côté serveur
+  - Validation de l'email Google
+  - Protection contre les attaques de type "account linking"
+  - Gestion des permissions OAuth (scope minimal : email, profile)
+
+- **Technologies recommandées** :
+  - **Frontend** : 
+    - Google Identity Services (nouvelle API recommandée par Google)
+    - Alternative : `@react-oauth/google` adapté pour SolidJS ou bibliothèque similaire
+  - **Backend** :
+    - `google-auth-library` (npm) pour Node.js
+    - Configuration OAuth 2.0 dans Google Cloud Console
+    - Variables d'environnement pour Client ID et Client Secret
+
+- **Flux utilisateur** :
+  1. L'utilisateur clique sur "Se connecter avec Google"
+  2. Redirection vers Google pour autorisation
+  3. Google renvoie un code/token à l'application
+  4. Le frontend envoie le token au backend
+  5. Le backend vérifie le token avec Google
+  6. Si l'utilisateur existe (via email ou googleId), connexion directe
+  7. Si l'utilisateur n'existe pas, création automatique du compte
+  8. Génération d'un token JWT pour l'application
+  9. Redirection vers la page d'accueil avec session active
+
+- **Bénéfices attendus** :
+  - Simplification du processus d'inscription (moins de champs à remplir)
+  - Réduction de la friction d'authentification
+  - Augmentation du taux d'inscription
+  - Amélioration de l'expérience utilisateur
+  - Sécurité renforcée (authentification via Google)
+  - Possibilité d'utiliser la photo de profil Google
+
+#### Vérification d'Email 🔄 **PLANIFIÉ**
+**Objectif** : Vérifier que les utilisateurs possèdent bien l'adresse email qu'ils ont fournie lors de l'inscription, améliorant la sécurité et la qualité des données
+
+**Spécifications techniques** :
+
+- **Frontend** :
+  - Message après inscription indiquant qu'un email de vérification a été envoyé
+  - Page de vérification d'email avec formulaire de saisie de token
+  - Page de vérification automatique via lien dans l'email
+  - Indicateur de statut de vérification dans le profil utilisateur
+  - Bouton "Renvoyer l'email de vérification" si non vérifié
+  - Message d'alerte si email non vérifié (optionnel : blocage de certaines fonctionnalités)
+
+- **Backend** :
+  - Route API `POST /api/auth/verify-email` pour vérifier le token
+  - Route API `POST /api/auth/resend-verification` pour renvoyer l'email
+  - Route API `GET /api/auth/verify-email/:token` pour vérification automatique via lien
+  - Génération de token de vérification unique lors de l'inscription
+  - Stockage du token dans la base de données avec expiration (24 heures)
+  - Mise à jour du statut `emailVerified` après vérification
+  - Invalidation du token après utilisation
+  - Validation stricte (token valide, non expiré, non utilisé)
+
+- **Base de données** :
+  - Ajout champ `emailVerified` (boolean, default: false) dans l'entité `User`
+  - Ajout champ `emailVerificationToken` (string, nullable, unique) dans `User`
+  - Ajout champ `emailVerificationExpiry` (datetime, nullable) dans `User`
+  - Migration pour ajouter les nouveaux champs
+  - Index sur `emailVerificationToken` pour recherche rapide
+
+- **Système de Mailing** :
+  - Envoi automatique d'email de vérification lors de l'inscription
+  - Template email HTML avec lien de vérification cliquable
+  - Lien contenant le token unique
+  - Expiration du lien (24 heures)
+  - Instructions claires pour l'utilisateur
+  - Possibilité de renvoyer l'email (rate limiting)
+
+- **Sécurité** :
+  - Token unique et aléatoire (32+ caractères)
+  - Expiration (24 heures)
+  - Utilisation unique (token supprimé après vérification)
+  - Validation côté serveur stricte
+  - Protection contre les attaques par force brute
+  - Rate limiting sur les demandes de renvoi (max 3 par heure)
+
+- **Flux utilisateur** :
+  1. L'utilisateur s'inscrit avec son email
+  2. Le backend génère un token de vérification unique
+  3. Envoi automatique d'email de vérification
+  4. L'utilisateur reçoit l'email avec lien de vérification
+  5. Option A : L'utilisateur clique sur le lien dans l'email
+  6. Option B : L'utilisateur copie le token et le saisit manuellement
+  7. Le backend valide le token et met à jour `emailVerified = true`
+  8. Invalidation du token et confirmation à l'utilisateur
+  9. Si email non vérifié après 24h, possibilité de renvoyer l'email
+
+- **Fonctionnalités optionnelles** :
+  - Blocage de certaines fonctionnalités si email non vérifié (création d'offre, envoi de messages)
+  - Badge "Email vérifié" dans le profil
+  - Notification si tentative de connexion avec email non vérifié
+  - Expiration du compte si email non vérifié après X jours (optionnel)
+
+- **Technologies recommandées** :
+  - **Backend** :
+    - `nodemailer` ou `sendgrid` pour l'envoi d'emails
+    - `crypto` (Node.js) pour génération de tokens sécurisés
+    - `bcryptjs` pour hashage optionnel du token (si stockage sécurisé)
+  - **Templates** :
+    - `handlebars` ou `ejs` pour templates email HTML
+    - Design responsive pour emails
+
+- **Bénéfices attendus** :
+  - Vérification de la validité des adresses email
+  - Réduction des comptes avec emails invalides ou frauduleux
+  - Sécurité renforcée (confirmation de propriété de l'email)
+  - Amélioration de la qualité des données utilisateur
+  - Possibilité de contacter les utilisateurs de manière fiable
+  - Conformité avec les bonnes pratiques de sécurité
+
+### Décembre 2024 - Réinitialisation de Mot de Passe
+
+#### Réinitialisation de Mot de Passe 🔄 **PLANIFIÉ**
+**Objectif** : Permettre aux utilisateurs de réinitialiser leur mot de passe en cas d'oubli via un système sécurisé par email
+
+**Spécifications techniques** :
+
+- **Frontend** :
+  - Page "Mot de passe oublié" avec formulaire de demande
+  - Formulaire de saisie d'email pour demande de réinitialisation
+  - Page de réinitialisation avec formulaire nouveau mot de passe
+  - Validation côté client (confirmation du nouveau mot de passe)
+  - Messages de confirmation et d'erreur
+  - Lien dans la page de connexion vers "Mot de passe oublié"
+
+- **Backend** :
+  - Route API `POST /api/auth/forgot-password` pour demander la réinitialisation
+  - Route API `POST /api/auth/reset-password` pour réinitialiser avec token
+  - Route API `GET /api/auth/verify-reset-token/:token` pour vérifier la validité du token
+  - Génération de token sécurisé unique (crypto.randomBytes ou uuid)
+  - Stockage du token dans la base de données avec expiration (1 heure)
+  - Hashage du nouveau mot de passe avec bcrypt
+  - Invalidation du token après utilisation
+  - Validation stricte (email existant, token valide, mot de passe fort)
+
+- **Base de données** :
+  - Ajout table `password_reset_tokens` ou champ dans `User` :
+    - `resetToken` (string, nullable, unique)
+    - `resetTokenExpiry` (datetime, nullable)
+  - Migration pour ajouter les champs nécessaires
+
+- **Système de Mailing** :
+  - Envoi d'email avec lien de réinitialisation
+  - Template email HTML avec bouton/lien cliquable
+  - Lien contenant le token unique
+  - Expiration du lien (1 heure)
+  - Instructions claires pour l'utilisateur
+
+- **Sécurité** :
+  - Token unique et aléatoire (32+ caractères)
+  - Expiration courte (1 heure)
+  - Utilisation unique (token supprimé après utilisation)
+  - Validation côté serveur stricte
+  - Protection contre les attaques par force brute
+  - Rate limiting sur les demandes de réinitialisation
+
+- **Flux utilisateur** :
+  1. L'utilisateur clique sur "Mot de passe oublié" sur la page de connexion
+  2. Saisie de son email
+  3. Le backend vérifie que l'email existe
+  4. Génération d'un token unique et stockage avec expiration
+  5. Envoi d'email avec lien de réinitialisation
+  6. L'utilisateur clique sur le lien dans l'email
+  7. Redirection vers la page de réinitialisation avec token
+  8. Saisie du nouveau mot de passe (avec confirmation)
+  9. Le backend valide le token et met à jour le mot de passe
+  10. Invalidation du token et confirmation à l'utilisateur
+
+- **Technologies recommandées** :
+  - **Backend** :
+    - `nodemailer` ou `sendgrid` pour l'envoi d'emails
+    - `crypto` (Node.js) pour génération de tokens sécurisés
+    - `bcryptjs` pour hashage du nouveau mot de passe
+  - **Templates** :
+    - `handlebars` ou `ejs` pour templates email HTML
+    - Design responsive pour emails
+
+- **Bénéfices attendus** :
+  - Récupération de compte en cas d'oubli de mot de passe
+  - Sécurité renforcée avec tokens temporaires
+  - Expérience utilisateur améliorée
+  - Réduction du support client
+
+### Décembre 2024 - Système de Mailing
+
+#### Système de Mailing 🔄 **PLANIFIÉ**
+**Objectif** : Mettre en place un système d'envoi d'emails pour communiquer avec les utilisateurs (notifications, confirmations, réinitialisation de mot de passe)
+
+**Spécifications techniques** :
+
+- **Architecture** :
+  - Service centralisé d'envoi d'emails (`EmailService`)
+  - Templates d'emails réutilisables et personnalisables
+  - Configuration SMTP ou service tiers
+  - Queue d'envoi pour emails asynchrones (optionnel)
+
+- **Types d'emails à implémenter** :
+
+  1. **Emails transactionnels** :
+     - ✅ Email de bienvenue après inscription
+     - ✅ Email de vérification d'email (lors de l'inscription)
+     - ✅ Email de confirmation de création d'offre
+     - ✅ Email de réinitialisation de mot de passe
+     - 🔄 Email de confirmation de modification de profil (futur)
+     - 🔄 Email de confirmation de suppression d'offre (futur)
+
+  2. **Emails de notification** (futur) :
+     - Notifications de nouvelles offres correspondant aux critères de recherche
+     - Notifications de nouveaux messages
+     - Rappels et alertes personnalisées
+
+- **Backend** :
+  - Service `EmailService` avec méthodes :
+    - `sendWelcomeEmail(user)` : Email de bienvenue
+    - `sendEmailVerificationEmail(user, token)` : Email de vérification d'email
+    - `sendPasswordResetEmail(user, token)` : Email de réinitialisation
+    - `sendOfferConfirmationEmail(user, offer)` : Confirmation de création d'offre
+    - `sendEmail(to, subject, html)` : Méthode générique
+  - Configuration SMTP via variables d'environnement
+  - Gestion des erreurs d'envoi (logging, retry)
+  - Templates d'emails avec variables dynamiques
+
+- **Templates d'emails** :
+  - Template de base HTML responsive
+  - Templates spécifiques :
+    - `welcome-email.html` : Email de bienvenue
+    - `email-verification.html` : Email de vérification d'email
+    - `password-reset.html` : Email de réinitialisation
+    - `offer-confirmation.html` : Confirmation de création d'offre
+  - Variables dynamiques : nom utilisateur, liens, données d'offre, etc.
+  - Design cohérent avec l'application
+
+- **Configuration** :
+  - Variables d'environnement :
+    - `SMTP_HOST` : Serveur SMTP
+    - `SMTP_PORT` : Port SMTP (587 pour TLS)
+    - `SMTP_USER` : Utilisateur SMTP
+    - `SMTP_PASSWORD` : Mot de passe SMTP
+    - `EMAIL_FROM` : Adresse email expéditeur
+    - `EMAIL_FROM_NAME` : Nom de l'expéditeur
+  - Support services tiers :
+    - SendGrid
+    - Mailgun
+    - AWS SES
+    - Postmark
+
+- **Queue d'envoi** (optionnel, pour production) :
+  - Queue Redis ou Bull pour emails asynchrones
+  - Retry automatique en cas d'échec
+  - Gestion de la priorité des emails
+  - Monitoring des emails en attente/échoués
+
+- **Technologies recommandées** :
+  - **Backend** :
+    - `nodemailer` : Bibliothèque Node.js pour SMTP
+    - `@sendgrid/mail` : SDK SendGrid (si service tiers)
+    - `handlebars` ou `ejs` : Moteur de templates
+    - `mjml` : Framework pour emails HTML responsive (optionnel)
+  - **Queue** (optionnel) :
+    - `bull` ou `bullmq` : Queue Redis
+    - `redis` : Base de données pour queue
+
+- **Sécurité** :
+  - Validation des adresses email
+  - Protection contre le spam (rate limiting)
+  - Authentification SMTP sécurisée (TLS)
+  - Stockage sécurisé des credentials SMTP
+
+- **Bénéfices attendus** :
+  - Communication efficace avec les utilisateurs
+  - Notifications importantes (réinitialisation, confirmations)
+  - Professionnalisme de l'application
+  - Amélioration de l'engagement utilisateur
+  - Support de fonctionnalités futures (notifications, rappels)
+
+### Décembre 2024 - Progressive Web App (PWA)
+
+#### Progressive Web App (PWA) 🔄 **PLANIFIÉ**
+**Objectif** : Permettre l'installation de l'application web sur le bureau ou l'appareil mobile pour offrir une expérience native-like et un accès rapide
+
+**Spécifications techniques** :
+
+- **Manifeste Web** :
+  - Fichier `manifest.json` avec :
+    - Nom de l'application et nom court
+    - Description de l'application
+    - Icônes adaptatives (192x192, 512x512, et tailles intermédiaires)
+    - Couleurs de thème (primary, background)
+    - Mode d'affichage (standalone, fullscreen)
+    - Orientation (portrait, landscape, ou les deux)
+    - Point de départ (`start_url`)
+    - Scope de l'application
+  - Génération automatique via `vite-plugin-pwa`
+
+- **Service Worker minimal** :
+  - Service Worker minimal requis uniquement pour permettre l'installation
+  - Pas de stratégie de cache complexe
+  - Pas de fonctionnement hors ligne
+  - Service Worker simple pour satisfaire les exigences PWA
+
+- **Installation** :
+  - Bouton "Installer l'application" dans l'interface
+  - Gestion de l'événement `beforeinstallprompt`
+  - Installation sur mobile (iOS, Android) et desktop
+  - Splash screen personnalisé au démarrage
+  - Icône sur l'écran d'accueil
+
+- **Icônes et Design** :
+  - Génération automatique des icônes à partir d'une image source
+  - Icônes adaptatives pour différents appareils et contextes
+  - Masque d'icône pour iOS
+  - Couleurs de thème cohérentes avec l'application
+
+- **Frontend** :
+  - Configuration Vite avec `vite-plugin-pwa`
+  - Génération automatique du manifeste
+  - Service Worker minimal généré automatiquement
+  - Composant pour gérer l'installation PWA
+  - Détection de la compatibilité PWA
+  - Affichage conditionnel du bouton d'installation
+
+- **Technologies recommandées** :
+  - **Frontend** :
+    - `vite-plugin-pwa` : Plugin Vite pour génération automatique du manifeste et service worker minimal
+    - Service Worker API (natif, version minimale)
+    - Web App Manifest API (natif)
+
+- **Configuration** :
+  - Configuration dans `vite.config.ts` avec `vite-plugin-pwa`
+  - Génération automatique des icônes (via plugin ou outil externe)
+  - Variables d'environnement pour configuration PWA (optionnel)
+
+- **Compatibilité** :
+  - Support Chrome, Edge, Firefox, Safari (iOS 11.3+)
+  - Détection de la compatibilité PWA
+  - Fallback gracieux pour navigateurs non compatibles
+
+- **Sécurité** :
+  - Service Worker uniquement sur HTTPS (ou localhost en développement)
+  - Manifeste web sécurisé
+
+- **Flux utilisateur** :
+  1. L'utilisateur visite l'application
+  2. Le service worker minimal s'enregistre automatiquement
+  3. L'utilisateur voit le bouton "Installer l'application" (si compatible)
+  4. L'utilisateur clique sur le bouton d'installation
+  5. L'application s'installe sur le bureau/appareil
+  6. L'utilisateur peut lancer l'application depuis l'icône installée
+  7. L'application s'ouvre en mode standalone (sans barre d'adresse)
+
+- **Bénéfices attendus** :
+  - Expérience utilisateur améliorée (installation sur bureau/appareil)
+  - Accès rapide depuis l'écran d'accueil/bureau
+  - Expérience native-like sur mobile et desktop
+  - Meilleure visibilité (apparaît comme application native)
+  - Engagement utilisateur accru (installation)
+  - Pas de besoin d'aller dans le navigateur pour accéder à l'application
