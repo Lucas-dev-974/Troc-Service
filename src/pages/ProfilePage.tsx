@@ -1,4 +1,4 @@
-import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createSignal, For, onMount, Show, createMemo } from 'solid-js';
 import { useNavigate } from '@solidjs/router';
 import Layout from '../components/Layout';
 import OfferCard from '../components/OfferCard';
@@ -21,6 +21,16 @@ const ProfilePage: Component = () => {
   const [email, setEmail] = createSignal('');
   const [locationData, setLocationData] = createSignal<LocationData>({});
   const [errors, setErrors] = createSignal<Record<string, string>>({});
+  const [showValidatedOffers, setShowValidatedOffers] = createSignal(false);
+
+  // Séparer les offres actives et validées
+  const activeOffers = createMemo(() => {
+    return profile()?.offers.filter(offer => !offer.validated) || [];
+  });
+
+  const validatedOffers = createMemo(() => {
+    return profile()?.offers.filter(offer => offer.validated) || [];
+  });
 
   onMount(async () => {
     if (!auth.isAuthenticated()) {
@@ -321,26 +331,100 @@ const ProfilePage: Component = () => {
               </Show>
 
               <Show when={profile()?.offers && profile()!.offers.length > 0}>
-                <div class="space-y-4">
-                  <For each={profile()!.offers}>
-                    {(offer) => (
-                      <OfferCard
-                        offer={offer}
-                        onEdit={(o) => {
-                          navigate('/');
-                          // Le formulaire d'édition sera géré par HomePage
-                        }}
-                        onDelete={async (id) => {
-                          try {
-                            await apiService.deleteOffer(id);
-                            await loadProfile();
-                          } catch (err) {
-                            console.error('Error deleting offer:', err);
-                          }
-                        }}
-                      />
-                    )}
-                  </For>
+                <div class="space-y-6">
+                  {/* Offres actives (non validées) */}
+                  <Show when={activeOffers().length > 0}>
+                    <div>
+                      <h3 class="text-lg font-semibold text-gray-800 mb-4">Offres actives ({activeOffers().length})</h3>
+                      <div class="space-y-4">
+                        <For each={activeOffers()}>
+                          {(offer) => (
+                            <OfferCard
+                              offer={offer}
+                              onEdit={(o) => {
+                                navigate('/');
+                                // Le formulaire d'édition sera géré par HomePage
+                              }}
+                              onDelete={async (id) => {
+                                try {
+                                  await apiService.deleteOffer(id);
+                                  await loadProfile();
+                                } catch (err) {
+                                  console.error('Error deleting offer:', err);
+                                }
+                              }}
+                              onValidate={async (id) => {
+                                try {
+                                  await apiService.validateOffer(id);
+                                  await loadProfile();
+                                } catch (err) {
+                                  console.error('Error validating offer:', err);
+                                }
+                              }}
+                            />
+                          )}
+                        </For>
+                      </div>
+                    </div>
+                  </Show>
+
+                  {/* Offres validées (dans un dropdown) */}
+                  <Show when={validatedOffers().length > 0}>
+                    <div class="border-t border-gray-200 pt-6">
+                      <button
+                        onClick={() => setShowValidatedOffers(!showValidatedOffers())}
+                        class="w-full flex items-center justify-between text-left p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+                        aria-expanded={showValidatedOffers()}
+                        aria-controls="validated-offers-content"
+                      >
+                        <div class="flex items-center gap-2">
+                          <span class="text-lg font-semibold text-gray-800">
+                            Offres validées ({validatedOffers().length})
+                          </span>
+                          <span class="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full">
+                            ✓ Validées
+                          </span>
+                        </div>
+                        <svg
+                          class={`w-5 h-5 text-gray-500 transition-transform ${showValidatedOffers() ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+                      <Show when={showValidatedOffers()}>
+                        <div id="validated-offers-content" class="mt-4 space-y-4">
+                          <For each={validatedOffers()}>
+                            {(offer) => (
+                              <OfferCard
+                                offer={offer}
+                                onEdit={(o) => {
+                                  navigate('/');
+                                  // Le formulaire d'édition sera géré par HomePage
+                                }}
+                                onDelete={async (id) => {
+                                  try {
+                                    await apiService.deleteOffer(id);
+                                    await loadProfile();
+                                  } catch (err) {
+                                    console.error('Error deleting offer:', err);
+                                  }
+                                }}
+                              />
+                            )}
+                          </For>
+                        </div>
+                      </Show>
+                    </div>
+                  </Show>
                 </div>
               </Show>
             </div>

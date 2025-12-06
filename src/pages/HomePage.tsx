@@ -166,6 +166,25 @@ const HomePage: Component = () => {
     }
   };
 
+  const handleValidateOffer = async (id: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await apiService.validateOffer(id);
+      await loadOffers(pagination().page); // Recharger la page actuelle
+    } catch (err: any) {
+      console.error('Error validating offer:', err);
+      if (err?.statusCode === 403) {
+        setError('Vous n\'êtes pas autorisé à valider cette offre.');
+      } else {
+        const errorMessage = err?.message || 'Erreur lors de la validation de l\'offre. Veuillez réessayer.';
+        setError(errorMessage);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleDeleteOffer = async (id: number) => {
     setError(null);
     try {
@@ -321,6 +340,7 @@ const HomePage: Component = () => {
                       offer={offer}
                       onEdit={handleEditOffer}
                       onDelete={handleDeleteOffer}
+                      onValidate={handleValidateOffer}
                     />
                   )}
                 </For>

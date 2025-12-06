@@ -20,5 +20,8 @@ router.put('/:id', authenticateToken, offerController.update);
 // DELETE /api/offers/:id - Supprimer une offre (protégé)
 router.delete('/:id', authenticateToken, offerController.delete);
 
+// PATCH /api/offers/:id/validate - Valider une offre (protégé)
+router.patch('/:id/validate', authenticateToken, offerController.validate);
+
 export default router;
 

@@ -11,7 +11,7 @@
 
 Le projet **Troc & Services** est une application web full-stack moderne développée avec SolidJS (frontend) et Node.js/Express/TypeORM (backend). L'application permet aux utilisateurs de s'inscrire, se connecter, et proposer/consulter des offres de troc (services, objets, nourriture) entre particuliers. 
 
-**État actuel** : Application fonctionnelle et complète avec authentification, API REST, base de données SQLite, validation avancée, recherche, tri, pagination, modification/suppression d'offres, gestion d'erreurs robuste, profil utilisateur avec statistiques, accessibilité améliorée, et géolocalisation complète. Le projet est prêt pour un usage en développement et tests utilisateurs. Quelques améliorations sont recommandées pour la production (tests, notifications, migration base de données).
+**État actuel** : Application fonctionnelle et complète avec authentification, API REST, base de données SQLite, validation avancée, recherche, tri, pagination, modification/suppression/validation d'offres, gestion d'erreurs robuste, profil utilisateur avec statistiques et gestion des offres validées, accessibilité améliorée, géolocalisation complète, et Progressive Web App (PWA) pour installation sur bureau/appareil. Le projet est prêt pour un usage en développement et tests utilisateurs. Quelques améliorations sont recommandées pour la production (tests, notifications, migration base de données).
 
 ---
 
@@ -266,6 +266,8 @@ troc-dalon/
 - **Validation en temps réel** : Feedback immédiat lors de la saisie
 - **Géolocalisation automatique** : Bouton "Me localiser automatiquement" dans les formulaires ✅
 - **Filtres géographiques** : Filtres par pays, région, ville, code postal sur la page d'accueil ✅
+- **Installation PWA** : Bouton "Installer l'application" pour installation sur bureau/appareil ✅
+- **Mode standalone** : Application s'ouvre en mode natif sans barre d'adresse une fois installée ✅
 
 ### 4. Base de Données ✅
 - **SQLite** : Base de données embarquée (aucune installation requise)
@@ -334,14 +336,17 @@ troc-dalon/
 - ✅ Compteur de caractères pour la description
 
 #### 2. **Gestion des Offres** ✅ **IMPLÉMENTÉ**
-**État actuel** : CRUD complet avec contrôle d'accès
+**État actuel** : CRUD complet avec contrôle d'accès et validation
 **Fonctionnalités** :
 - ✅ Modification d'offres existantes (par le propriétaire uniquement)
 - ✅ Suppression d'offres (par le propriétaire uniquement)
-- ✅ Vérification de propriété automatique avant modification/suppression
-- ✅ Interface utilisateur avec boutons modifier/supprimer
+- ✅ Validation d'offres (par le propriétaire uniquement) - Les offres validées ne s'affichent plus dans les recherches
+- ✅ Vérification de propriété automatique avant modification/suppression/validation
+- ✅ Interface utilisateur avec boutons modifier/supprimer/valider
 - ✅ Formulaire d'édition avec pré-remplissage
-- ✅ Confirmation avant suppression
+- ✅ Confirmation avant suppression et validation
+- ✅ Badge "✓ Validée" pour les offres validées
+- ✅ Affichage séparé des offres validées dans le profil utilisateur (dropdown)
 
 #### 3. **Recherche et Filtres** ✅ **IMPLÉMENTÉ**
 **État actuel** : Recherche, filtres combinés, tri, pagination et géolocalisation
@@ -370,7 +375,7 @@ troc-dalon/
 ### 🟢 Mineures (Priorité Basse)
 
 #### 5. **Profil Utilisateur** ✅ **IMPLÉMENTÉ**
-**État actuel** : Page de profil complète avec gestion et géolocalisation
+**État actuel** : Page de profil complète avec gestion, géolocalisation et organisation des offres validées
 **Fonctionnalités** :
 - ✅ Page de profil utilisateur (`/profile`)
 - ✅ Modification du profil (username, email, localisation)
@@ -379,6 +384,10 @@ troc-dalon/
 - ✅ Statistiques (nombre total d'offres, par type)
 - ✅ Route API `/api/users/profile` (GET, PUT)
 - ✅ Route API `/api/users/offers` pour récupérer les offres utilisateur
+- ✅ Séparation des offres actives et validées
+- ✅ Affichage des offres actives par défaut
+- ✅ Dropdown/collapsible pour les offres validées avec compteur et badge
+- ✅ Actions sur les offres (modifier, supprimer, valider) depuis le profil
 - ✅ Validation des modifications de profil
 - ✅ Mise à jour automatique du contexte d'authentification
 - ✅ Affichage de la localisation dans le profil ✅
@@ -500,21 +509,38 @@ troc-dalon/
   - Professionnalisme de l'application
   - Amélioration de l'engagement utilisateur
 
-#### 11. **Progressive Web App (PWA)** 🔄 **PLANIFIÉ**
-**Fonctionnalités à implémenter** :
-- Manifeste web (`manifest.json`) pour installation sur appareils
-- Installation sur mobile/desktop (bouton "Installer l'application")
-- Icônes adaptatives pour différents appareils (192x192, 512x512, et tailles intermédiaires)
-- Splash screen personnalisé au démarrage
-- Service Worker minimal (uniquement pour l'installation, pas de cache hors ligne)
-- **Technologies recommandées** :
-  - `vite-plugin-pwa` : Plugin Vite pour génération automatique du manifeste
-  - Service Worker minimal pour permettre l'installation
-- **Bénéfices** :
+#### 11. **Progressive Web App (PWA)** ✅ **IMPLÉMENTÉ**
+**Fonctionnalités implémentées** :
+- ✅ Manifeste web (`manifest.json`) généré automatiquement pour installation sur appareils
+- ✅ Installation sur mobile/desktop avec bouton "Installer l'application"
+- ✅ Icônes adaptatives générées (192x192, 512x512, apple-touch-icon 180x180)
+- ✅ Service Worker minimal (uniquement pour l'installation, pas de cache hors ligne)
+- ✅ Composant `InstallPWA` pour gérer l'installation avec détection automatique
+- ✅ Mode standalone pour expérience native (sans barre d'adresse)
+- ✅ Meta tags PWA configurés (theme-color, apple-mobile-web-app, etc.)
+- ✅ Script de génération d'icônes (`scripts/generate-icons.js`) avec Sharp
+- ✅ Logs de débogage pour faciliter le développement
+- **Technologies utilisées** :
+  - `vite-plugin-pwa` : Plugin Vite pour génération automatique du manifeste et service worker
+  - `sharp` : Bibliothèque pour génération d'icônes PNG depuis SVG
+  - Service Worker API (natif, version minimale)
+  - Web App Manifest API (natif)
+- **Fichiers créés** :
+  - `src/components/InstallPWA.tsx` : Composant d'installation PWA
+  - `public/icon.svg` : Icône source SVG
+  - `public/mask-icon.svg` : Masque d'icône pour iOS
+  - `public/icon-192x192.png` : Icône 192x192
+  - `public/icon-512x512.png` : Icône 512x512
+  - `public/apple-touch-icon.png` : Icône iOS 180x180
+  - `scripts/generate-icons.js` : Script de génération d'icônes
+  - `PWA_SETUP.md` : Documentation de configuration
+  - `PWA_DEBUG.md` : Guide de débogage
+- **Bénéfices obtenus** :
   - Expérience utilisateur améliorée (installation sur bureau/appareil)
   - Expérience native-like sur mobile et desktop
-  - Accès rapide depuis l'écran d'accueil
+  - Accès rapide depuis l'écran d'accueil/bureau
   - Meilleure visibilité (apparaît comme application native)
+  - Installation simple via bouton dédié
 
 #### 12. **Notifications**
 **Fonctionnalités manquantes** :
@@ -630,12 +656,12 @@ troc-dalon/
    - Emails transactionnels (bienvenue, confirmation, réinitialisation)
    - Configuration SMTP
 
-7. **Progressive Web App (PWA)** 🔄 **PLANIFIÉ**
-   - Manifeste web pour installation
-   - Installation sur bureau/appareil
-   - Icônes adaptatives et splash screen
+7. ✅ **Progressive Web App (PWA)** - Implémenté
+   - Manifeste web généré automatiquement
+   - Installation sur bureau/appareil avec bouton dédié
+   - Icônes adaptatives générées automatiquement
    - Service Worker minimal (installation uniquement)
-   - Expérience native-like
+   - Expérience native-like en mode standalone
 
 8. **Tests**
    - Tests unitaires backend
@@ -643,11 +669,12 @@ troc-dalon/
    - Tests composants frontend
 
 ### Phase 3 - Long Terme (2-3 mois)
-1. **Progressive Web App (PWA)** 🔄 **PLANIFIÉ**
-   - Manifeste web pour installation
-   - Installation sur bureau/appareil
-   - Icônes adaptatives et splash screen
+1. ✅ **Progressive Web App (PWA)** - Implémenté
+   - Manifeste web généré automatiquement
+   - Installation sur bureau/appareil avec bouton dédié
+   - Icônes adaptatives générées automatiquement
    - Service Worker minimal (installation uniquement)
+   - Mode standalone pour expérience native
 
 2. **Fonctionnalités avancées**
    - Système de favoris
@@ -724,13 +751,16 @@ Le projet **Troc & Services** démontre une excellente maîtrise des technologie
 - ✅ Géolocalisation complète avec géocodage automatique
 - ✅ Filtres géographiques et priorisation des offres par localisation
 - ✅ Pré-remplissage automatique des champs du formulaire d'offre avec les données du profil
+- ✅ Progressive Web App (PWA) avec installation sur bureau/appareil
+- ✅ Service Worker minimal pour permettre l'installation
+- ✅ Icônes adaptatives générées automatiquement
 
 **Prochaines étapes** :
 - Implémenter l'authentification OAuth avec Google
 - Implémenter la vérification d'email
 - Implémenter la réinitialisation de mot de passe
 - Mettre en place le système de mailing
-- Transformer le frontend en Progressive Web App (PWA)
+- ✅ Transformer le frontend en Progressive Web App (PWA) - **TERMINÉ**
 - Implémenter des tests (unitaires, intégration, E2E)
 - Ajouter système de notifications
 - Préparer pour la production (migration base de données, CI/CD)
@@ -1223,60 +1253,79 @@ Avec les améliorations recommandées, ce projet peut facilement devenir une **a
 
 ### Décembre 2024 - Progressive Web App (PWA)
 
-#### Progressive Web App (PWA) 🔄 **PLANIFIÉ**
+#### Progressive Web App (PWA) ✅ **IMPLÉMENTÉ**
 **Objectif** : Permettre l'installation de l'application web sur le bureau ou l'appareil mobile pour offrir une expérience native-like et un accès rapide
 
-**Spécifications techniques** :
+**Implémentation réalisée** :
 
-- **Manifeste Web** :
-  - Fichier `manifest.json` avec :
-    - Nom de l'application et nom court
-    - Description de l'application
-    - Icônes adaptatives (192x192, 512x512, et tailles intermédiaires)
-    - Couleurs de thème (primary, background)
-    - Mode d'affichage (standalone, fullscreen)
-    - Orientation (portrait, landscape, ou les deux)
-    - Point de départ (`start_url`)
-    - Scope de l'application
-  - Génération automatique via `vite-plugin-pwa`
+- **Manifeste Web** ✅ :
+  - Fichier `manifest.json` généré automatiquement avec :
+    - Nom de l'application : "Troc & Services"
+    - Nom court : "Troc & Services"
+    - Description : "Plateforme de troc et services entre particuliers"
+    - Icônes adaptatives (192x192, 512x512, apple-touch-icon 180x180)
+    - Couleur de thème : #2563eb (bleu)
+    - Couleur de fond : #ffffff (blanc)
+    - Mode d'affichage : standalone (expérience native)
+    - Orientation : portrait
+    - Point de départ : `/`
+    - Scope : `/`
+  - Génération automatique via `vite-plugin-pwa` configuré dans `vite.config.ts`
 
-- **Service Worker minimal** :
-  - Service Worker minimal requis uniquement pour permettre l'installation
-  - Pas de stratégie de cache complexe
-  - Pas de fonctionnement hors ligne
-  - Service Worker simple pour satisfaire les exigences PWA
+- **Service Worker minimal** ✅ :
+  - Service Worker minimal généré automatiquement par `vite-plugin-pwa`
+  - Configuration Workbox avec `skipWaiting: true` et `clientsClaim: true`
+  - Pas de stratégie de cache complexe (runtimeCaching vide)
+  - Pas de fonctionnement hors ligne (comme demandé)
+  - Service Worker simple pour satisfaire uniquement les exigences d'installation PWA
+  - Enregistrement automatique avec `registerType: 'autoUpdate'`
 
-- **Installation** :
-  - Bouton "Installer l'application" dans l'interface
-  - Gestion de l'événement `beforeinstallprompt`
-  - Installation sur mobile (iOS, Android) et desktop
-  - Splash screen personnalisé au démarrage
-  - Icône sur l'écran d'accueil
+- **Installation** ✅ :
+  - Composant `InstallPWA.tsx` créé pour gérer l'installation
+  - Bouton "Installer l'application" affiché automatiquement quand disponible
+  - Gestion complète de l'événement `beforeinstallprompt`
+  - Détection automatique si l'app est déjà installée (mode standalone)
+  - Installation sur mobile (iOS, Android) et desktop (Windows, macOS, Linux)
+  - Icône sur l'écran d'accueil/bureau
+  - Fenêtre standalone (sans barre d'adresse du navigateur)
+  - Logs de débogage intégrés pour faciliter le développement
 
-- **Icônes et Design** :
-  - Génération automatique des icônes à partir d'une image source
-  - Icônes adaptatives pour différents appareils et contextes
-  - Masque d'icône pour iOS
-  - Couleurs de thème cohérentes avec l'application
+- **Icônes et Design** ✅ :
+  - Icône source SVG créée (`public/icon.svg`) avec design cohérent
+  - Script de génération automatique (`scripts/generate-icons.js`) avec Sharp
+  - Icônes PNG générées automatiquement :
+    - `icon-192x192.png` (192x192 pixels)
+    - `icon-512x512.png` (512x512 pixels)
+    - `apple-touch-icon.png` (180x180 pixels pour iOS)
+  - Masque d'icône pour iOS (`public/mask-icon.svg`)
+  - Couleurs de thème cohérentes avec l'application (#2563eb)
+  - Commande npm : `npm run generate-icons` pour régénérer les icônes
 
-- **Frontend** :
-  - Configuration Vite avec `vite-plugin-pwa`
-  - Génération automatique du manifeste
-  - Service Worker minimal généré automatiquement
-  - Composant pour gérer l'installation PWA
-  - Détection de la compatibilité PWA
-  - Affichage conditionnel du bouton d'installation
+- **Frontend** ✅ :
+  - Configuration Vite avec `vite-plugin-pwa` dans `vite.config.ts`
+  - Génération automatique du manifeste et service worker
+  - Composant `InstallPWA.tsx` intégré dans `Layout.tsx`
+  - Détection automatique de la compatibilité PWA
+  - Affichage conditionnel du bouton d'installation (bas à droite)
+  - Gestion des événements `beforeinstallprompt` et `appinstalled`
+  - Meta tags PWA ajoutés dans `index.html` :
+    - `theme-color` : #2563eb
+    - `apple-mobile-web-app-capable` : yes
+    - `apple-mobile-web-app-status-bar-style` : default
+    - `apple-mobile-web-app-title` : Troc & Services
 
-- **Technologies recommandées** :
+- **Technologies utilisées** ✅ :
   - **Frontend** :
-    - `vite-plugin-pwa` : Plugin Vite pour génération automatique du manifeste et service worker minimal
+    - `vite-plugin-pwa` (v1.2.0+) : Plugin Vite pour génération automatique du manifeste et service worker minimal
+    - `sharp` : Bibliothèque Node.js pour génération d'icônes PNG depuis SVG
     - Service Worker API (natif, version minimale)
     - Web App Manifest API (natif)
 
-- **Configuration** :
-  - Configuration dans `vite.config.ts` avec `vite-plugin-pwa`
-  - Génération automatique des icônes (via plugin ou outil externe)
-  - Variables d'environnement pour configuration PWA (optionnel)
+- **Configuration** ✅ :
+  - Configuration complète dans `vite.config.ts` avec `vite-plugin-pwa`
+  - Génération automatique des icônes via script `scripts/generate-icons.js`
+  - Options Workbox configurées pour service worker minimal
+  - Mode développement activé (`devOptions.enabled: true`)
 
 - **Compatibilité** :
   - Support Chrome, Edge, Firefox, Safari (iOS 11.3+)
@@ -1296,10 +1345,82 @@ Avec les améliorations recommandées, ce projet peut facilement devenir une **a
   6. L'utilisateur peut lancer l'application depuis l'icône installée
   7. L'application s'ouvre en mode standalone (sans barre d'adresse)
 
-- **Bénéfices attendus** :
+- **Bénéfices obtenus** ✅ :
   - Expérience utilisateur améliorée (installation sur bureau/appareil)
   - Accès rapide depuis l'écran d'accueil/bureau
-  - Expérience native-like sur mobile et desktop
+  - Expérience native-like sur mobile et desktop (mode standalone)
   - Meilleure visibilité (apparaît comme application native)
-  - Engagement utilisateur accru (installation)
+  - Engagement utilisateur accru (installation simple via bouton)
   - Pas de besoin d'aller dans le navigateur pour accéder à l'application
+  - Installation détectée automatiquement par le navigateur
+
+- **Documentation créée** :
+  - `PWA_SETUP.md` : Guide de configuration et test de la PWA
+  - `PWA_DEBUG.md` : Guide de débogage pour résoudre les problèmes d'installation
+  - `public/ICONS_README.md` : Instructions pour générer les icônes
+
+- **Fichiers modifiés/créés** :
+  - ✅ `vite.config.ts` : Configuration PWA ajoutée
+  - ✅ `src/components/InstallPWA.tsx` : Composant d'installation créé
+  - ✅ `src/components/Layout.tsx` : Intégration du composant InstallPWA
+  - ✅ `index.html` : Meta tags PWA ajoutés
+  - ✅ `public/icon.svg` : Icône source SVG
+  - ✅ `public/mask-icon.svg` : Masque d'icône iOS
+  - ✅ `public/icon-192x192.png` : Icône 192x192
+  - ✅ `public/icon-512x512.png` : Icône 512x512
+  - ✅ `public/apple-touch-icon.png` : Icône iOS 180x180
+- ✅ `scripts/generate-icons.js` : Script de génération d'icônes
+- ✅ `package.json` : Script `generate-icons` ajouté, dépendances `vite-plugin-pwa` et `sharp` ajoutées
+
+### Décembre 2024 - Validation d'Offres
+
+#### Validation d'Offres ✅ **IMPLÉMENTÉ**
+**Objectif** : Permettre aux utilisateurs de valider leurs offres pour les retirer des recherches tout en les conservant dans leur profil
+
+**Implémentation réalisée** :
+
+- **Backend** ✅ :
+  - Ajout du champ `validated` (boolean, default: false) dans l'entité `Offer`
+  - Modification de `OfferService.findAll` pour exclure automatiquement les offres validées (`validated = false`)
+  - Ajout de la méthode `validate(id, userId)` dans `OfferService` pour valider une offre
+  - Vérification de propriété avant validation (seul le propriétaire peut valider)
+  - Route API `PATCH /api/offers/:id/validate` (protégée par authentification)
+
+- **Frontend** ✅ :
+  - Ajout de `validated: boolean` dans l'interface `Offer` (`src/services/api.ts`)
+  - Ajout de la méthode `validateOffer(id)` dans `ApiService`
+  - Bouton "Valider" dans `OfferCard` (visible uniquement pour le propriétaire et si l'offre n'est pas validée)
+  - Badge "✓ Validée" affiché pour les offres validées
+  - Confirmation avant validation avec message explicatif
+  - Gestion de la validation dans `HomePage` et `ProfilePage`
+
+- **Profil Utilisateur** ✅ :
+  - Séparation des offres actives et validées dans le profil
+  - Affichage des offres actives (non validées) par défaut
+  - Dropdown/collapsible pour les offres validées avec compteur
+  - Badge "✓ Validées" sur le bouton du dropdown
+  - Animation de transition pour l'ouverture/fermeture du dropdown
+
+- **Fonctionnement** :
+  1. Les offres validées ne s'affichent plus dans les recherches (filtre automatique)
+  2. Seul le propriétaire peut valider son offre
+  3. Les offres validées restent visibles dans le profil utilisateur
+  4. Les offres validées sont regroupées dans un dropdown pour une meilleure organisation
+  5. Les offres actives sont affichées en premier dans le profil
+
+- **Fichiers modifiés/créés** :
+  - ✅ `serveur/src/entities/Offer.ts` : Ajout du champ `validated`
+  - ✅ `serveur/src/services/OfferService.ts` : Filtre des offres validées et méthode `validate`
+  - ✅ `serveur/src/controllers/OfferController.ts` : Méthode `validate`
+  - ✅ `serveur/src/routes/offerRoutes.ts` : Route `PATCH /api/offers/:id/validate`
+  - ✅ `src/services/api.ts` : Interface `Offer` mise à jour et méthode `validateOffer`
+  - ✅ `src/components/OfferCard.tsx` : Bouton "Valider" et badge "✓ Validée"
+  - ✅ `src/pages/HomePage.tsx` : Gestion de la validation
+  - ✅ `src/pages/ProfilePage.tsx` : Séparation des offres actives/validées avec dropdown
+
+- **Bénéfices obtenus** ✅ :
+  - Meilleure organisation des offres dans le profil utilisateur
+  - Les offres validées ne polluent plus les résultats de recherche
+  - Conservation de l'historique des offres validées
+  - Interface claire avec séparation visuelle des offres actives et validées
+  - Expérience utilisateur améliorée avec dropdown pour les offres validées

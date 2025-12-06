@@ -6,6 +6,7 @@ interface OfferCardProps {
   offer: Offer;
   onEdit?: (offer: Offer) => void;
   onDelete?: (id: number) => void;
+  onValidate?: (id: number) => void;
 }
 
 const OfferCard: Component<OfferCardProps> = (props) => {
@@ -100,8 +101,26 @@ const OfferCard: Component<OfferCardProps> = (props) => {
         </a>
         </div>
 
-        <Show when={isOwner() && (props.onEdit || props.onDelete)}>
+        <Show when={isOwner() && (props.onEdit || props.onDelete || props.onValidate)}>
           <div class="flex gap-2 pt-2 border-t border-gray-100">
+            <Show when={props.onValidate && !props.offer.validated}>
+              <button
+                onClick={() => {
+                  if (confirm('Êtes-vous sûr de vouloir valider cette offre ? Elle ne sera plus visible dans les recherches.')) {
+                    props.onValidate?.(props.offer.id);
+                  }
+                }}
+                class="flex-1 px-3 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg hover:bg-green-100 transition"
+                aria-label={`Valider l'offre: ${props.offer.title}`}
+              >
+                Valider
+              </button>
+            </Show>
+            <Show when={props.offer.validated}>
+              <div class="flex-1 px-3 py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg text-center">
+                ✓ Validée
+              </div>
+            </Show>
             <Show when={props.onEdit}>
               <button
                 onClick={() => props.onEdit?.(props.offer)}

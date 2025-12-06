@@ -74,23 +74,21 @@ export class OfferService {
 
     const queryBuilder = this.offerRepository.createQueryBuilder('offer');
 
+    // Exclure les offres validées des recherches
+    queryBuilder.where('offer.validated = :validated', { validated: false });
+
     // Filtre par type
     if (type) {
-      queryBuilder.where('offer.type = :type', { type });
+      queryBuilder.andWhere('offer.type = :type', { type });
     }
 
     // Recherche par mots-clés
     if (search) {
-      const searchCondition = type
-        ? 'offer.type = :type AND (offer.title LIKE :search OR offer.description LIKE :search OR offer.author LIKE :search)'
-        : '(offer.title LIKE :search OR offer.description LIKE :search OR offer.author LIKE :search)';
-      
       const searchParam = `%${search}%`;
-      if (type) {
-        queryBuilder.where(searchCondition, { type, search: searchParam });
-      } else {
-        queryBuilder.where(searchCondition, { search: searchParam });
-      }
+      queryBuilder.andWhere(
+        '(offer.title LIKE :search OR offer.description LIKE :search OR offer.author LIKE :search)',
+        { search: searchParam }
+      );
     }
 
     // Filtres géographiques
@@ -200,6 +198,21 @@ export class OfferService {
 
     const result = await this.offerRepository.delete(id);
     return result.affected !== undefined && result.affected > 0;
+  }
+
+  async validate(id: number, userId: number): Promise<Offer | null> {
+    const offer = await this.findOne(id);
+    if (!offer) {
+      return null;
+    }
+
+    // Vérifier la propriété
+    if (offer.userId !== userId) {
+      throw new Error('Unauthorized: You can only validate your own offers');
+    }
+
+    offer.validated = true;
+    return await this.offerRepository.save(offer);
   }
 
   // Méthode pour vérifier la propriété

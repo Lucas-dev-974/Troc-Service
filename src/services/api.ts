@@ -14,6 +14,7 @@ export interface Offer {
   region?: string;
   city?: string;
   postalCode?: string;
+  validated: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -192,6 +193,12 @@ class ApiService {
   async deleteOffer(id: number): Promise<void> {
     return this.request<void>(`/offers/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  async validateOffer(id: number): Promise<Offer> {
+    return this.request<Offer>(`/offers/${id}/validate`, {
+      method: 'PATCH',
     });
   }
 

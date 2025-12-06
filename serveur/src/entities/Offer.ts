@@ -51,6 +51,9 @@ export class Offer {
   @Column({ type: 'varchar', length: 20, nullable: true })
   postalCode?: string;
 
+  @Column({ type: 'boolean', default: false })
+  validated!: boolean;
+
   @ManyToOne(() => User, (user) => user.offers, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user!: User;

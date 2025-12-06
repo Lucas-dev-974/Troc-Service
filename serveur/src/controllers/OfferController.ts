@@ -196,5 +196,30 @@ export class OfferController {
       throw createError('Error deleting offer', 500, 'DELETE_ERROR');
     }
   };
+
+  validate = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        throw createError(ValidationErrors.ID_INVALID, 400, 'VALIDATION_ERROR');
+      }
+
+      const offer = await this.offerService.validate(id, req.userId!);
+
+      if (!offer) {
+        throw createError('Offer not found', 404, 'NOT_FOUND');
+      }
+
+      res.json(offer);
+    } catch (error) {
+      if (error instanceof Error && 'statusCode' in error) {
+        throw error;
+      }
+      if (error instanceof Error && error.message.includes('Unauthorized')) {
+        throw createError(error.message, 403, 'FORBIDDEN');
+      }
+      throw createError('Error validating offer', 500, 'VALIDATE_ERROR');
+    }
+  };
 }
 
